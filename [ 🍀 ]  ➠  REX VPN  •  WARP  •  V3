@@ -20,9 +20,9 @@
         186,
         84
       ],
-      "server": "engage.cloudflareclient.com",
-      "server_port": 2408,
-      "tag": "WARP in WARP",
+      "server": "162.159.192.142",
+      "server_port": 7103,
+      "tag": "WARP IN WARP",
       "type": "wireguard"
     },
     {

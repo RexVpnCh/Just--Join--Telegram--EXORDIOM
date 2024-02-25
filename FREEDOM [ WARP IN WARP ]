@@ -14,13 +14,17 @@
     "servers": [
       {
         "tag": "dns-remote",
-        "address": "udp://1.1.1.1",
-        "address_resolver": "dns-direct",
-        "detour": "select"
+        "address": "https://dnslow.me/dns-query",
+        "address_resolver": "dns-direct"
+      },
+      {
+        "tag": "dns-trick-direct",
+        "address": "https://sky.rethinkdns.com/",
+        "detour": "direct-fragment"
       },
       {
         "tag": "dns-direct",
-        "address": "1.1.1.1",
+        "address": "https://dnslow.me/dns-query",
         "address_resolver": "dns-local",
         "detour": "direct"
       },
@@ -36,6 +40,10 @@
     ],
     "rules": [
       {
+        "domain": "dnslow.me",
+        "server": "dns-direct"
+      },
+      {
         "domain_suffix": ".ir",
         "geosite": "ir",
         "server": "dns-direct"
@@ -47,9 +55,36 @@
       }
     ],
     "final": "dns-remote",
+    "static_ips": {
+      "sky.rethinkdns.com": [
+        "172.67.204.84",
+        "104.21.69.44",
+        "2606:4700:3032::6815:452c",
+        "2606:4700:3031::ac43:cc54",
+        "104.18.203.232",
+        "104.18.202.232",
+        "172.64.172.4",
+        "172.64.173.4",
+        "2606:4700:e4::ac40:ad04",
+        "2606:4700:e4::ac40:ac04"
+      ]
+    },
     "independent_cache": true
   },
   "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "mtu": 9000,
+      "inet4_address": "172.19.0.1/28",
+      "inet6_address": "fdfe:dcba:9876::1/126",
+      "auto_route": true,
+      "strict_route": true,
+      "endpoint_independent_nat": true,
+      "sniff": true,
+      "sniff_override_destination": true,
+      "domain_strategy": "prefer_ipv4"
+    },
     {
       "type": "mixed",
       "tag": "mixed-in",
@@ -57,8 +92,7 @@
       "listen_port": 2334,
       "sniff": true,
       "sniff_override_destination": true,
-      "domain_strategy": "ipv4_only",
-      "set_system_proxy": true
+      "domain_strategy": "prefer_ipv4"
     },
     {
       "type": "direct",
@@ -75,9 +109,8 @@
       "tag": "select",
       "outbounds": [
         "auto",
-        "WARP | 1",
-        "WARP | 2",
-        "WARP | 3"
+        "🇮🇷 WARP - Iran",
+        "🇩🇪 WARP - Germany"
       ],
       "default": "auto"
     },
@@ -85,59 +118,46 @@
       "type": "urltest",
       "tag": "auto",
       "outbounds": [
-        "WARP | 1",
-        "WARP | 2",
-        "WARP | 3"
+        "🇮🇷 WARP - Iran",
+        "🇩🇪 WARP - Germany"
       ],
       "url": "http://cp.cloudflare.com/",
-      "interval": "1m0s"
+      "interval": "10m0s"
     },
     {
       "type": "wireguard",
-      "tag": "WARP | 1",
+      "tag": "🇮🇷 WARP - Iran",
       "local_address": [
         "172.16.0.2/32",
-        "2606:4700:110:80eb:8c97:359b:dec4:7f8d/128"
+        "2606:4700:110:8c91:4063:21d0:7dd5:f218/128"
       ],
-      "private_key": "wAb3We/kMxNrUPXKV8wOxm3DFdoaaHXvy/pkY2cEaVI=",
-      "server": "188.114.98.224",
-      "server_port": 908,
+      "private_key": "AJ0si9MKGCtoC/NHwKc8G0MADbTPl/1M7KNWvM24W1g=",
+      "server": "188.114.96.17",
+      "server_port": 1843,
       "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
       "reserved": "AAAA",
       "mtu": 1280,
-      "fake_packets": "10-15"
+      "fake_packets": "5-10",
+      "fake_packets_size": "40-100",
+      "fake_packets_delay": "20-250"
     },
     {
       "type": "wireguard",
-      "tag": "WARP | 2",
-      "detour": "WARP | 1",
+      "tag": "🇩🇪 WARP - Germany",
+      "detour": "🇮🇷 WARP - Iran",
       "local_address": [
         "172.16.0.2/32",
-        "2606:4700:110:8395:6097:a6ff:15bb:d562/128"
+        "2606:4700:110:8c15:3f90:ad2d:8810:77f3/128"
       ],
-      "private_key": "QAzPo0nz5WrEDlPXCrKZOiUft3EXi8sgDHaEWeXg2Gc=",
-      "server": "162.159.195.93",
-      "server_port": 2506,
+      "private_key": "iKXZlb1y3GtpI6shoSD3OMaC3RWmvO1kebNJRHeOm14=",
+      "server": "188.114.96.17",
+      "server_port": 1843,
       "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
       "reserved": "AAAA",
       "mtu": 1280,
-      "fake_packets": "10-15"
-    },
-    {
-      "type": "wireguard",
-      "tag": "WARP | 3",
-      "detour": "WARP | 2",
-      "local_address": [
-        "172.16.0.2/32",
-        "2606:4700:110:8a7c:b937:f34a:e861:ed34/128"
-      ],
-      "private_key": "2PlVvyo+sStMDzyAeF8Ijs8uQZWtQHXeCJHgF5KkU2Y=",
-      "server": "188.114.97.153",
-      "server_port": 8886,
-      "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
-      "reserved": "AAAA",
-      "mtu": 1280,
-      "fake_packets": "10-15"
+      "fake_packets": "5-10",
+      "fake_packets_size": "40-100",
+      "fake_packets_delay": "20-250"
     },
     {
       "type": "dns",
@@ -146,6 +166,15 @@
     {
       "type": "direct",
       "tag": "direct"
+    },
+    {
+      "type": "direct",
+      "tag": "direct-fragment",
+      "tls_fragment": {
+        "enabled": true,
+        "size": "5-10",
+        "sleep": "1-5"
+      }
     },
     {
       "type": "direct",
@@ -158,10 +187,10 @@
   ],
   "route": {
     "geoip": {
-      "path": "geo-assets\\chocolate4u-iran-sing-box-rules-geoip.db"
+      "path": "geo-assets/sagernet-sing-geoip-geoip.db"
     },
     "geosite": {
-      "path": "geo-assets\\chocolate4u-iran-sing-box-rules-geosite.db"
+      "path": "geo-assets/sagernet-sing-geosite-geosite.db"
     },
     "rules": [
       {
@@ -187,6 +216,7 @@
         "outbound": "bypass"
       }
     ],
+    "final": "select",
     "auto_detect_interface": true,
     "override_android_vpn": true
   },

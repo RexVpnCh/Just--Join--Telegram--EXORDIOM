@@ -4,4 +4,199 @@
 //support-url: https://t.me/durov
 //profile-web-page-url: https://telegram.org
 
-warp://auto#WarpInWarp&&detour=warp://auto#Warp 
+{
+  "log": {
+    "level": "warn",
+    "output": "box.log",
+    "timestamp": true
+  },
+  "dns": {
+    "servers": [
+      {
+        "tag": "dns-remote",
+        "address": "udp://1.1.1.1",
+        "address_resolver": "dns-direct",
+        "detour": "select"
+      },
+      {
+        "tag": "dns-direct",
+        "address": "1.1.1.1",
+        "address_resolver": "dns-local",
+        "detour": "direct"
+      },
+      {
+        "tag": "dns-local",
+        "address": "local",
+        "detour": "direct"
+      },
+      {
+        "tag": "dns-block",
+        "address": "rcode://success"
+      }
+    ],
+    "rules": [
+      {
+        "domain_suffix": ".ir",
+        "geosite": "ir",
+        "server": "dns-direct"
+      },
+      {
+        "domain": "cp.cloudflare.com",
+        "server": "dns-remote",
+        "rewrite_ttl": 3000
+      }
+    ],
+    "final": "dns-remote",
+    "independent_cache": true
+  },
+  "inbounds": [
+    {
+      "type": "mixed",
+      "tag": "mixed-in",
+      "listen": "127.0.0.1",
+      "listen_port": 2334,
+      "sniff": true,
+      "sniff_override_destination": true,
+      "domain_strategy": "ipv4_only",
+      "set_system_proxy": true
+    },
+    {
+      "type": "direct",
+      "tag": "dns-in",
+      "listen": "127.0.0.1",
+      "listen_port": 6450,
+      "override_address": "1.1.1.1",
+      "override_port": 53
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "selector",
+      "tag": "select",
+      "outbounds": [
+        "auto",
+        "WARP | 1",
+        "WARP | 2",
+        "WARP | 3"
+      ],
+      "default": "auto"
+    },
+    {
+      "type": "urltest",
+      "tag": "auto",
+      "outbounds": [
+        "WARP | 1",
+        "WARP | 2",
+        "WARP | 3"
+      ],
+      "url": "http://cp.cloudflare.com/",
+      "interval": "1m0s"
+    },
+    {
+      "type": "wireguard",
+      "tag": "WARP | 1",
+      "local_address": [
+        "172.16.0.2/32",
+        "2606:4700:110:80eb:8c97:359b:dec4:7f8d/128"
+      ],
+      "private_key": "wAb3We/kMxNrUPXKV8wOxm3DFdoaaHXvy/pkY2cEaVI=",
+      "server": "188.114.98.224",
+      "server_port": 908,
+      "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+      "reserved": "AAAA",
+      "mtu": 1280,
+      "fake_packets": "10-15"
+    },
+    {
+      "type": "wireguard",
+      "tag": "WARP | 2",
+      "detour": "WARP | 1",
+      "local_address": [
+        "172.16.0.2/32",
+        "2606:4700:110:8395:6097:a6ff:15bb:d562/128"
+      ],
+      "private_key": "QAzPo0nz5WrEDlPXCrKZOiUft3EXi8sgDHaEWeXg2Gc=",
+      "server": "162.159.195.93",
+      "server_port": 2506,
+      "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+      "reserved": "AAAA",
+      "mtu": 1280,
+      "fake_packets": "10-15"
+    },
+    {
+      "type": "wireguard",
+      "tag": "WARP | 3",
+      "detour": "WARP | 2",
+      "local_address": [
+        "172.16.0.2/32",
+        "2606:4700:110:8a7c:b937:f34a:e861:ed34/128"
+      ],
+      "private_key": "2PlVvyo+sStMDzyAeF8Ijs8uQZWtQHXeCJHgF5KkU2Y=",
+      "server": "188.114.97.153",
+      "server_port": 8886,
+      "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+      "reserved": "AAAA",
+      "mtu": 1280,
+      "fake_packets": "10-15"
+    },
+    {
+      "type": "dns",
+      "tag": "dns-out"
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    },
+    {
+      "type": "direct",
+      "tag": "bypass"
+    },
+    {
+      "type": "block",
+      "tag": "block"
+    }
+  ],
+  "route": {
+    "geoip": {
+      "path": "geo-assets\\chocolate4u-iran-sing-box-rules-geoip.db"
+    },
+    "geosite": {
+      "path": "geo-assets\\chocolate4u-iran-sing-box-rules-geosite.db"
+    },
+    "rules": [
+      {
+        "inbound": "dns-in",
+        "outbound": "dns-out"
+      },
+      {
+        "port": 53,
+        "outbound": "dns-out"
+      },
+      {
+        "clash_mode": "Direct",
+        "outbound": "direct"
+      },
+      {
+        "clash_mode": "Global",
+        "outbound": "select"
+      },
+      {
+        "domain_suffix": ".ir",
+        "geosite": "ir",
+        "geoip": "ir",
+        "outbound": "bypass"
+      }
+    ],
+    "auto_detect_interface": true,
+    "override_android_vpn": true
+  },
+  "experimental": {
+    "cache_file": {
+      "enabled": true,
+      "path": "clash.db"
+    },
+    "clash_api": {
+      "external_controller": "127.0.0.1:6756"
+    }
+  }
+}
